@@ -29,7 +29,7 @@ const orderSchema = new Schema({
     status: {
         type: String,
         enum: ['PENDING', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED'],
-        default: 'Pending'
+        default: 'PENDING'
     },
     address:{
         type:mongoose.Types.ObjectId,

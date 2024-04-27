@@ -193,7 +193,9 @@ const removeFromCart = catchAsyncError(async (req, res, next) => {
     });
 });
 
-
+/**
+ * Controller function to add address
+ */
 const addAddress = catchAsyncError(async(req,res,next) => {
     const {
         street,
@@ -219,7 +221,6 @@ const addAddress = catchAsyncError(async(req,res,next) => {
         postalCode,
         state,
         country,
-        isDefault,
         manualAddress,
         landMark,
         user:user
@@ -230,7 +231,9 @@ const addAddress = catchAsyncError(async(req,res,next) => {
     });
 });
 
-
+/**
+ * Controller function to get all address
+ */
 const getAllAddress = catchAsyncError(async(req,res,next) => {
     const user = req.user.id;
     if(!user){
@@ -308,7 +311,9 @@ const makeDefaultAddress = catchAsyncError(async (req, res, next) => {
     })
 });
 
-
+/**
+ * Controller function to updateAddress
+ */
 const updateAddress = catchAsyncError(async(req,res,next) => {
     const id = req.params.id;
     if(!id){
@@ -337,7 +342,9 @@ const updateAddress = catchAsyncError(async(req,res,next) => {
     });
 });
 
-
+/**
+ * Controller function to delete address
+ */
 const deleteAddress = catchAsyncError(async(req,res,next) => {
     const id = req.params.id;
     if(!id){

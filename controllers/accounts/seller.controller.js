@@ -3,25 +3,9 @@ import CryptoJS from "crypto-js";
 import ErrorHandler from "../../utils/errorHandler.js";
 import { catchAsyncError } from "../../middlewares/errors/catchAsyncErrors.js";
 import { sendToken } from "../../utils/sendToken.js";
+import generateRandomToken from "../../utils/generateRandomToken.js";
+import { Order } from "../../models/orders/order.model.js";
 
-
-function generateRandomToken(length) {
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let token = '';
-    for (let i = 0; i < length; i++) {
-        const randomIndex = Math.floor(Math.random() * characters.length);
-        token += characters.charAt(randomIndex);
-    }
-    const hashedToken = CryptoJS.SHA512(token).toString();
-    return hashedToken;
-}
-
-
-const sellerCookieOptions = {
-    httpOnly:true,
-    secure:true,
-    path:"/api/v1"
-}
 
 /**
  * function to register admin - disable it after creating admin
@@ -35,7 +19,7 @@ const register = catchAsyncError(async(req,res,next) => {
     if(user){
         return next(new ErrorHandler("user already exists ",409));
     }
-
+    
     // upload file on cloudinary..
     
     // const file=req.file;
@@ -54,7 +38,12 @@ const register = catchAsyncError(async(req,res,next) => {
             url:"demo_url"
         },
         sellerCookie:token
-    });
+    });   
+    const sellerCookieOptions = {
+        httpOnly:true,
+        secure:true,
+        path:"/api/v1"
+    }
     res.cookie("seller",token,sellerCookieOptions);
     sendToken(res,user,"Registered succesfully ",201);
 });
@@ -81,6 +70,12 @@ const login = catchAsyncError(async(req,res,next)=>{
     const token = generateRandomToken(30);
     user.sellerCookie = token;
     await user.save();
+    
+    const sellerCookieOptions = {
+        httpOnly:true,
+        secure:true,
+        path:"/api/v1"
+    }
     res.cookie("seller",token,sellerCookieOptions);
     sendToken(res,user,`Welcome back !! ${user.name}`,200);
    
@@ -114,6 +109,46 @@ const logout = catchAsyncError(async(req,res,next)=>{
     })
  });
 
+/**
+ * Controller function to update order status.
+ */
+const processOrder = catchAsyncError(async(req,res,next)=>{
+    const id = req.params.id;
+    if(!id){
+        return next(new ErrorHandler("Bad request ",400));
+    }
+    const order = await Order.findById(id);
+    if(!order){
+        return next(new ErrorHandler("Not found",404));
+    }
+    order.status = "PROCESSING";
+    await order.save();
+    res.status(200)
+    .json({
+        success:true,
+        message:"Order processed"
+    });
+});
+/**
+ * Controller function to send order to delivery partner
+ */
+const sendOrdertoDeliveryPartner = catchAsyncError(async(req,res,next) => {
+    const id = req.params.id;
+    if(!id){
+        return next(new ErrorHandler("Bad request",400));
+    }
+    const order = await Order.findById(id);
+    if(!order){
+        return next(new ErrorHandler("Not found",404));
+    }
+    order.status = "SHIPPED";
+    await order.save();
+    res.status(200)
+    .json({
+        success:true,
+        message:"Order shipped"
+    });
+});
 
 
  export {
@@ -121,4 +156,6 @@ const logout = catchAsyncError(async(req,res,next)=>{
     login,
     logout,
     myProfile,
+    processOrder,
+    sendOrdertoDeliveryPartner
  }

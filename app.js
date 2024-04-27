@@ -5,6 +5,7 @@ import errorMiddleWare from "./middlewares/errors/error.middleware.js";
 import cookieParser from "cookie-parser";
 import pkg from 'body-parser';
 import allRoutes from "./routes/index.js";
+import helmet  from "helmet";
 
 
 
@@ -21,6 +22,15 @@ dotenv.config({path:"./.env"});
  */
 connectToMongodb();
 
+/**
+ * Implemeting hsts header
+ */
+app.use(helmet());
+app.use(helmet.hsts({
+    maxAge: 31536000, 
+    includeSubDomains: true,
+    preload: true
+}));
 /**
  * using global middlewares..
  */
